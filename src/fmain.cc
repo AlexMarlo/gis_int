@@ -1,30 +1,6 @@
-#include <qapplication.h>
-#include <qwidget.h>
-#include <qlayout.h>
-#include <qmenubar.h>
-#include <qfiledialog.h>
-#include <qtoolbar.h>
-#include <qtoolbutton.h>
-#include <qbitmap.h>
-#include <qstatusbar.h>
-#include <qlabel.h>
-#include <qworkspace.h>
-#include <qtoolbar.h>
-#include <qsplitter.h>
-#include <qpushbutton.h>
-#include <QMouseEvent>
-#include <QScrollBar>
-#include <QListView>
-#include <QAction>
-#include <QtGui>
-#include <QCursor>
-#include <QX11Info>
-#include <QImage>
-
 #include <math.h>
 
 #include "fmain.h"
-#include <qpainter.h>
 
 MapData::MapData()
 {
@@ -42,7 +18,6 @@ AGMAP::AGMAP()
 {
 	clear();
 }
-;
 
 void AGMAP::clear()
 {

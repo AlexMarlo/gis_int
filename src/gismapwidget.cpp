@@ -3,13 +3,12 @@
 namespace gis
 {
 
-
 GisMapWidget::GisMapWidget( MapData mapData, QWidget *parent) :
 		QWidget( parent),
 		mapData_( mapData),
 		imageBits_( 0),
 		imageWidth_( 0),
-		imageHeight_ ( 0),
+		imageHeight_( 0),
 		isNeedUpdatePixmap_ ( true)
 {
 	verticalScrollBar_ = new QScrollBar( Qt::Horizontal, this);
@@ -27,7 +26,7 @@ GisMapWidget::GisMapWidget( MapData mapData, QWidget *parent) :
 	connect( verticalScrollBar_, SIGNAL( valueChanged( int)), this, SLOT( scrollChanged()));
 	connect( horizontalScrollBar_, SIGNAL( valueChanged( int)), this, SLOT( scrollChanged()));
 
-	setWindowTitle( "MapWidget");
+	setWindowTitle( tr( "Карта"));
 }
 
 void GisMapWidget::scrollChanged()
@@ -131,18 +130,6 @@ void GisMapWidget::closeMap()
 {
 	mapCloseMap( mapData_.agmap.hmap);
 	mapData_.agmap.hmap = 0;
-}
-
-void GisMapWidget::contentsMousePressEvent( QMouseEvent * e)
-{
-}
-
-void GisMapWidget::contentsMouseMoveEvent( QMouseEvent * e)
-{
-}
-
-void GisMapWidget::contentsMouseReleaseEvent( QMouseEvent * e)
-{
 }
 
 void GisMapWidget::changeScale( double kscale, long int xc, long int yc)

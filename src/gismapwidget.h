@@ -29,16 +29,12 @@ public slots:
 	void scaleChanged();
 
 protected:
-	virtual void contentsMousePressEvent( QMouseEvent *);
-	virtual void contentsMouseReleaseEvent( QMouseEvent *);
-	virtual void contentsMouseMoveEvent( QMouseEvent *);
 
 	virtual void paintEvent( QPaintEvent* event);
 	virtual void resizeEvent( QResizeEvent* event);
 	virtual void showEvent( QShowEvent* event);
 
 private:
-
 	QScrollBar * verticalScrollBar_;
 	QScrollBar * horizontalScrollBar_;
 
