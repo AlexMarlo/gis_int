@@ -40,9 +40,9 @@ signals:
 	void changeCoordSignal( double, double);
 	void changeScaleSignal( double);
 
-	void SignalMouseMove( int, int, int);
-	void SignalMousePress(int, int, int);
-	void SignalMouseRelease( int, int, int);
+	void SignalMouseMove( int x, int y, int modkey);
+	void SignalMousePress( int x, int y, int modkey);
+	void SignalMouseRelease( int x, int y, int modkey);
 
 public slots:
 	void scrollChanged();
@@ -53,6 +53,11 @@ protected:
 	virtual void paintEvent( QPaintEvent* event);
 	virtual void resizeEvent( QResizeEvent* event);
 	virtual void showEvent( QShowEvent* event);
+
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseReleaseEvent(QMouseEvent *event);
+    virtual void mouseDoubleClickEvent(QMouseEvent *event);
+    virtual void mouseMoveEvent(QMouseEvent *event);
 
 private:
 	QScrollBar * verticalScrollBar_;

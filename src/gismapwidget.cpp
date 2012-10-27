@@ -197,4 +197,23 @@ void GisMapWidget::ConvertMetric( double *X, double* Y, PPLACE pplace1, PPLACE p
 
 }
 
+void GisMapWidget::mousePressEvent(QMouseEvent *event)
+{
+	emit SignalMousePress( event->x(), event->y(), event->modifiers());
+}
+
+void GisMapWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+	emit SignalMouseRelease( event->x(), event->y(), event->modifiers());
+}
+
+void GisMapWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{}
+
+void GisMapWidget::mouseMoveEvent(QMouseEvent *event)
+{
+	emit SignalMouseMove( event->x(), event->y(), event->modifiers());
+}
+
+
 } /* namespace gis */
