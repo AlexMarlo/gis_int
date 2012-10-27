@@ -3,7 +3,7 @@
 namespace gis
 {
 
-MainWindow::MainWindow( QWidget* parent) :
+MainWidget::MainWidget( QWidget* parent) :
 		QMainWindow( parent)
 {
 	state = AGSNone;
@@ -14,44 +14,44 @@ MainWindow::MainWindow( QWidget* parent) :
 
 	MenuMapOpenSlot();
 
-	mapWidget = new MapWidget( mapData, this);
+	mapWidget = new GisMapWidget( mapData, this);
 	setCentralWidget( mapWidget);
 
 	showMaximized();
 }
 
-void MainWindow::LVVFCurrentChangedSlot( QListViewItem* I)
+void MainWidget::LVVFCurrentChangedSlot( QListViewItem* I)
 {
 }
 
-void MainWindow::LVVFExpandedSlot( QListViewItem* I)
+void MainWidget::LVVFExpandedSlot( QListViewItem* I)
 {
 }
 
-void MainWindow::fillLVVF()
+void MainWidget::fillLVVF()
 {
 }
 
-void MainWindow::fillLVVF( QListViewItem* I,
+void MainWidget::fillLVVF( QListViewItem* I,
 		std::vector< std::pair< int, int> >&chi, bool fill)
 {
 }
 
-void MainWindow::CreateMenus()
+void MainWidget::CreateMenus()
 {
 
 }
 
-void MainWindow::CreateTools()
+void MainWidget::CreateTools()
 {
 }
 
-void MainWindow::MenuMapExitSlot()
+void MainWidget::MenuMapExitSlot()
 {
 	close();
 }
 
-void MainWindow::MenuMapOpenSlot()
+void MainWidget::MenuMapOpenSlot()
 {
 	QString filename = "/home/smartnlg/workspace/dena/maps/Voronezh/m3709.map";
 //	filename = QFileDialog::getOpenFileName( this, tr( "Открытие файла карты"), "", tr( "Файл карты (*.map)"));
@@ -68,95 +68,95 @@ void MainWindow::MenuMapOpenSlot()
 	return;
 }
 
-void MainWindow::MenuMapPOpenSlot()
+void MainWidget::MenuMapPOpenSlot()
 {
 }
 
-void MainWindow::MenuMapCloseSlot()
+void MainWidget::MenuMapCloseSlot()
 {
 }
 
-void MainWindow::MenuMapPCloseSlot()
+void MainWidget::MenuMapPCloseSlot()
 {
 }
 
-void MainWindow::MenuModeSelectSlot()
+void MainWidget::MenuModeSelectSlot()
 {
 	setState( AGSSelect);
 }
 
-void MainWindow::MenuModeZoomSlot()
+void MainWidget::MenuModeZoomSlot()
 {
 	setState( AGSZoomIn);
 }
 
-void MainWindow::zoomInSlot()
+void MainWidget::zoomInSlot()
 {
 	setState( AGSZoomIn);
 }
 
-void MainWindow::zoomOutSlot()
+void MainWidget::zoomOutSlot()
 {
 	setState( AGSZoomOut);
 }
 
-void MainWindow::checkState()
+void MainWidget::checkState()
 {
 }
-void MainWindow::MenuViewViewSlot()
-{
-}
-
-void MainWindow::CreateStatus()
+void MainWidget::MenuViewViewSlot()
 {
 }
 
-void MainWindow::viewCoords( double x, double y)
+void MainWidget::CreateStatus()
 {
 }
 
-void MainWindow::viewScale( double sc)
+void MainWidget::viewCoords( double x, double y)
 {
 }
 
-void MainWindow::MenuObjCurrentSlot()
+void MainWidget::viewScale( double sc)
 {
 }
 
-void MainWindow::MenuObjNewSlot()
+void MainWidget::MenuObjCurrentSlot()
 {
 }
 
-void MainWindow::MenuObjMetSlot()
+void MainWidget::MenuObjNewSlot()
 {
 }
 
-void MainWindow::MenuObjDelSlot()
+void MainWidget::MenuObjMetSlot()
 {
 }
 
-void MainWindow::MenuObjUnselectSlot()
+void MainWidget::MenuObjDelSlot()
 {
 }
 
-void MainWindow::repaintMap()
+void MainWidget::MenuObjUnselectSlot()
 {
 }
 
-void MainWindow::qqq()
+void MainWidget::repaintMap()
 {
 }
 
-void MainWindow::ButCreateClickedSlot()
+void MainWidget::qqq()
 {
 }
 
-void MainWindow::closeEvent( QCloseEvent * e)
+void MainWidget::ButCreateClickedSlot()
+{
+}
+
+void MainWidget::closeEvent( QCloseEvent * e)
 {
 	QWidget::closeEvent( e);
 }
 
-void MainWindow::ButShowClickedSlot()
+void MainWidget::ButShowClickedSlot()
 {
 }
 

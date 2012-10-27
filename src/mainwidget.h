@@ -3,18 +3,18 @@
 
 #include <QtGui>
 #include "QMainWindow"
+
 #include "fmain.h"
+#include "gismapwidget.h"
 
 namespace gis
 {
 
-class MainWindow : public QMainWindow
+class MainWidget : public QMainWindow
 {
 Q_OBJECT
-	friend class MapWidget;
-
 public:
-	MainWindow( QWidget* parent = 0);
+	MainWidget( QWidget* parent = 0);
 
 	void setState( AGState st)
 	{
@@ -34,11 +34,6 @@ public:
 	}
 
 	void repaintMap();
-
-	MapWidget* getMapWidget()
-	{
-		return mapWidget;
-	}
 
 public slots:
 	void MenuMapOpenSlot();
@@ -74,7 +69,7 @@ protected:
 	void fillLVVF();
 	void fillLVVF( QListViewItem* I, std::vector< std::pair< int, int> >&chi, bool fill);
 
-	MapWidget* mapWidget;
+	GisMapWidget* mapWidget;
 	MapData mapData;
 
 	QMenuBar* menuBar_;
