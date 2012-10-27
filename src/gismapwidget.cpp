@@ -8,17 +8,43 @@ GisMapWidget::GisMapWidget( QWidget *parent) :
 		imageBits_( 0),
 		imageWidth_( 0),
 		imageHeight_( 0),
-		isNeedUpdatePixmap_ ( true)
+		isNeedUpdatePixmap_ ( true),
+		hMap_( 0)
 {
-	verticalScrollBar_ = new QScrollBar( Qt::Horizontal, this);
-	horizontalScrollBar_ = new QScrollBar( Qt::Vertical, this);
+	setupUi();
+}
 
-	verticalScrollBar_->setFixedWidth( 100);
-	horizontalScrollBar_->setFixedHeight( 100);
+void GisMapWidget::setupUi()
+{
+    verticalLayout_ = new QVBoxLayout(this);
+    verticalLayout_->setSpacing(0);
+    verticalLayout_->setContentsMargins( 0, 0, 0, 0);
+    verticalLayout_->setObjectName(QString::fromUtf8("verticalLayout"));
+    horizontalLayout_ = new QHBoxLayout();
+    horizontalLayout_->setSpacing(6);
+    horizontalLayout_->setObjectName(QString::fromUtf8("horizontalLayout"));
+    horizontalSpacer_ = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+    horizontalLayout_->addItem( horizontalSpacer_);
+
+    verticalScrollBar_ = new QScrollBar(this);
+    verticalScrollBar_->setObjectName( QString::fromUtf8("verticalScrollBar"));
+    verticalScrollBar_->setOrientation( Qt::Vertical);
+
+    horizontalLayout_->addWidget( verticalScrollBar_);
+
+    verticalLayout_->addLayout( horizontalLayout_);
+
+    horizontalScrollBar_ = new QScrollBar( this);
+    horizontalScrollBar_->setObjectName(QString::fromUtf8("horizontalScrollBar"));
+    horizontalScrollBar_->setOrientation(Qt::Horizontal);
+
+    verticalLayout_->addWidget( horizontalScrollBar_);
 
 	connect( verticalScrollBar_, SIGNAL( valueChanged( int)), this, SLOT( scrollChanged()));
 	connect( horizontalScrollBar_, SIGNAL( valueChanged( int)), this, SLOT( scrollChanged()));
-}
+
+} // setupUi
 
 void GisMapWidget::showEvent(QShowEvent *event)
 {
@@ -28,6 +54,7 @@ void GisMapWidget::showEvent(QShowEvent *event)
 void GisMapWidget::scrollChanged()
 {
 	isNeedUpdatePixmap_ = true;
+	resizeScoll();
 	repaint();
 }
 
@@ -45,6 +72,26 @@ void GisMapWidget::Repaint()
 void GisMapWidget::resizeEvent( QResizeEvent* event)
 {
 	isNeedUpdatePixmap_ = true;
+	resizeScoll();
+}
+
+void GisMapWidget::resizeScoll()
+{
+	if( hMap_ == 0)
+		return;
+
+	long int x, y;
+	long int mapW, mapH;
+	mapGetPictureSize( hMap_, &mapW, &mapH);
+
+	x = mapW - width();
+	y = mapH - height();
+
+	if (x < 0) x = 0;
+	if (y < 0) y = 0;
+
+	horizontalScrollBar_->setMaximum( x);
+	verticalScrollBar_->setMaximum( y);
 }
 
 void GisMapWidget::paintEvent(QPaintEvent *event)
@@ -54,17 +101,21 @@ void GisMapWidget::paintEvent(QPaintEvent *event)
 	RECT rectDraw;
 	int cx, cy, cw, ch;
 	int bytes_per_line;
-	if(hMap){
-		cx = verticalScrollBar_->value();
-		cy = horizontalScrollBar_->value();
+
+	if(hMap)
+	{
+		cx = horizontalScrollBar_->value();
+		cy = verticalScrollBar_->value();
 		cw = event->rect().width();
 		ch = event->rect().height();
 		bytes_per_line = cw * mapDepth / 8;
-		if(isNeedUpdatePixmap_){
+		if(isNeedUpdatePixmap_)
+		{
 			XIMAGEDESC Ximagedesc;
 			long allignwidth = cw * mapDepth / 8;
 			long size = allignwidth * ch;
-			if(imageWidth_ != event->rect().width() || imageHeight_ != event->rect().height()){
+			if( imageWidth_ != event->rect().width() || imageHeight_ != event->rect().height())
+			{
 				if(imageBits_)
 					FreeTheMemory(imageBits_);
 
@@ -91,7 +142,8 @@ void GisMapWidget::paintEvent(QPaintEvent *event)
 		}
 
 		QImage::Format format;
-		switch (mapDepth){
+		switch (mapDepth)
+		{
 			case 8:
 				format = QImage::Format_Indexed8;
 				break;
@@ -105,11 +157,11 @@ void GisMapWidget::paintEvent(QPaintEvent *event)
 				format = QImage::Format_Invalid;
 				break;
 		}
+
 		QImage image((uchar*)(imageBits_), cw, ch, bytes_per_line, format);
 		QPainter painter(this);
 		painter.drawImage(QPoint(0, 0), image);
 	}
-
 }
 
 void GisMapWidget::closeMap()
@@ -120,12 +172,39 @@ void GisMapWidget::closeMap()
 
 void GisMapWidget::changeScale(double kscale, long int xc, long int yc)
 {
+	if (hMap_ == 0) return;
+
 	long int oldMapWidth, oldMapHeight;
 	mapGetPictureSize(mapData_.agmap.hmap, &oldMapWidth, &oldMapHeight);
 	mapChangeViewScale(mapData_.agmap.hmap, &xc, &yc, kscale);
-	mapData_.agmap.scale = mapGetRealShowScale(mapData_.agmap.hmap);changeScaleSignal( mapData_.agmap.scale);
+	mapData_.agmap.scale = mapGetRealShowScale(mapData_.agmap.hmap);
+	changeScaleSignal( mapData_.agmap.scale);
 
 	mapGetPictureSize( mapData_.agmap.hmap, &mapData_.agmap.width, &mapData_.agmap.height);
+
+//
+//long int X,Y;
+//long int mapW, mapH;
+//
+////�������� ������� �����
+//X = horizontalScrollBar()->value() + viewport()->width() / 2;
+//Y = verticalScrollBar()->value() + viewport()->height() / 2;
+//mapChangeViewScale(hMap, &X, &Y, Change);
+//mapGetPictureSize(hMap, &mapW, &mapH);
+//
+//MyViewport->hide();
+////��������� �������� �����������
+//MyViewport->resize(mapW, mapH);
+//
+////�������� ����� �����
+//X = X - viewport()->width() / 2;
+//if (X < 0) X = 0;
+//Y = Y - viewport()->height() / 2;
+//if (Y < 0) Y = 0;
+//
+//horizontalScrollBar()->setValue(X);
+//verticalScrollBar()->setValue(Y);
+//MyViewport->show();
 }
 
 bool GisMapWidget::MapOpen( QString absoluteMapPath, bool param)
@@ -133,18 +212,14 @@ bool GisMapWidget::MapOpen( QString absoluteMapPath, bool param)
 	if( absoluteMapPath.isEmpty())
 		return false;
 
-	HMAP hMap = mapOpenMap( absoluteMapPath.toStdString().c_str());
-	if( hMap == 0)
+	hMap_ = mapOpenMap( absoluteMapPath.toStdString().c_str());
+	if( hMap_ == 0)
 		return false;
 
-	mapData_.agmap.init( hMap);
+	mapData_.agmap.init( hMap_);
 	mapData_.agmap.Print();
 
-	verticalScrollBar_->setMinimum( 0);
-	horizontalScrollBar_->setMinimum( 0);
-
-	verticalScrollBar_->setMaximum( mapData_.agmap.width);
-	horizontalScrollBar_->setMaximum( mapData_.agmap.height);
+	resizeScoll();
 
 	mapSetBackColor( mapData_.agmap.hmap, 0xFAFAFA);
 
@@ -194,7 +269,6 @@ bool GisMapWidget::GetMapActive()
 
 void GisMapWidget::ConvertMetric( double *X, double* Y, PPLACE pplace1, PPLACE pplace2)
 {
-
 }
 
 void GisMapWidget::mousePressEvent(QMouseEvent *event)

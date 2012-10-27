@@ -8,8 +8,8 @@ MainWidget::MainWidget( QWidget* parent) :
 {
 	mapWidget = new GisMapWidget( this);
 
-	QString filename = "/home/smartnlg/workspace/dena/maps/Voronezh/m3709.map";
-//	filename = QFileDialog::getOpenFileName( this, tr( "Открытие файла карты"), "", tr( "Файл карты (*.map)"));
+//	QString filename = "/home/smartnlg/workspace/dena/maps/Voronezh/m3709.map";
+	QString filename = QFileDialog::getOpenFileName( this, tr( "Открытие файла карты"), "", tr( "Файл карты (*.map)"));
 
 	if( filename.isEmpty()) return;
 	mapWidget->MapOpen( filename, true);

@@ -7,10 +7,8 @@
 #include <utility>
 #include <iostream>
 
-extern "C"
-{
 #include <mapapi.h>
-}
+
 #undef max
 #undef min
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))

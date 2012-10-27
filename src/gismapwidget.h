@@ -60,9 +60,18 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *event);
 
 private:
+    void setupUi();
+
+    void resizeScoll();
+
+private:
+    QVBoxLayout *verticalLayout_;
+    QHBoxLayout *horizontalLayout_;
+    QSpacerItem *horizontalSpacer_;
 	QScrollBar * verticalScrollBar_;
 	QScrollBar * horizontalScrollBar_;
 
+	HMAP hMap_;
 	MapData mapData_;
 
 	char *imageBits_;
