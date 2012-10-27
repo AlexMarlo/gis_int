@@ -3,26 +3,46 @@
 
 #include <QtGui>
 
-#include "fmain.h"
+#include "gismapstructs.h"
 
 namespace gis
 {
-
-//class GisMapWidget
 
 class GisMapWidget : public QWidget
 {
 Q_OBJECT
 public:
-	GisMapWidget( MapData mapData, QWidget *parent = 0);
+	GisMapWidget( QWidget *parent = 0);
 
 	void closeMap();
 	void changeScale( double kscale, long int xc, long int yc);
-	void qqq();
+
+	void Repaint();
+
+	void GetMapHW( long int* h, long int* w);
+	void SetViewScale( long int scale);
+	long int GetViewScale();
+
+	void GetMapLeftTop( int* top, int* left);
+	void SetMapLeftTop( long int left, long int top);
+
+	HMAP GetMapHandle();
+	QString GetMapFileName();
+
+	bool MapOpen( QString absoluteMapPath, bool param);
+	void MapClose();
+
+	bool GetMapActive();
+
+	void ConvertMetric( double *X, double* Y, PPLACE pplace1, PPLACE pplace2);
 
 signals:
 	void changeCoordSignal( double, double);
 	void changeScaleSignal( double);
+
+	void SignalMouseMove( int, int, int);
+	void SignalMousePress(int, int, int);
+	void SignalMouseRelease( int, int, int);
 
 public slots:
 	void scrollChanged();
@@ -50,5 +70,6 @@ private:
 	QPainter zoomPainter;
 	bool zoomBegin;
 };
+
 } /* namespace gis */
 #endif /* GISMAPWIDGET_H_ */

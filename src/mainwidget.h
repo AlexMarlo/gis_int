@@ -4,7 +4,7 @@
 #include <QtGui>
 #include "QMainWindow"
 
-#include "fmain.h"
+#include "gismapstructs.h"
 #include "gismapwidget.h"
 
 namespace gis
@@ -25,8 +25,6 @@ protected:
 private:
 	GisMapWidget* mapWidget;
 	MapData mapData;
-	AGState state;
-	AGState oldState;
 };
 
 } /* namespace gis */

@@ -5,7 +5,7 @@
 #include <QTranslator>
 #include <QTextCodec>
 
-#include "fmain.h"
+#include "gismapstructs.h"
 #include "mainwidget.h"
 
 int main( int argc, char ** argv)
@@ -29,4 +29,3 @@ int main( int argc, char ** argv)
 
 	return ( ret);
 }
-

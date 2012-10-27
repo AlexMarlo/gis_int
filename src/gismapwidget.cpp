@@ -3,9 +3,8 @@
 namespace gis
 {
 
-GisMapWidget::GisMapWidget( MapData mapData, QWidget *parent) :
+GisMapWidget::GisMapWidget( QWidget *parent) :
 		QWidget( parent),
-		mapData_( mapData),
 		imageBits_( 0),
 		imageWidth_( 0),
 		imageHeight_( 0),
@@ -17,16 +16,13 @@ GisMapWidget::GisMapWidget( MapData mapData, QWidget *parent) :
 	verticalScrollBar_->setFixedWidth( 100);
 	horizontalScrollBar_->setFixedHeight( 100);
 
-	verticalScrollBar_->setMinimum( 0);
-	horizontalScrollBar_->setMinimum( 0);
-
-	verticalScrollBar_->setMaximum( mapData_.agmap.width);
-	horizontalScrollBar_->setMaximum( mapData_.agmap.height);
-
 	connect( verticalScrollBar_, SIGNAL( valueChanged( int)), this, SLOT( scrollChanged()));
 	connect( horizontalScrollBar_, SIGNAL( valueChanged( int)), this, SLOT( scrollChanged()));
+}
 
-	setWindowTitle( tr( "Карта"));
+void GisMapWidget::showEvent(QShowEvent *event)
+{
+	isNeedUpdatePixmap_ = true;
 }
 
 void GisMapWidget::scrollChanged()
@@ -41,70 +37,61 @@ void GisMapWidget::scaleChanged()
 	repaint();
 }
 
+void GisMapWidget::Repaint()
+{
+	repaint();
+}
+
 void GisMapWidget::resizeEvent( QResizeEvent* event)
 {
 	isNeedUpdatePixmap_ = true;
 }
 
-void GisMapWidget::showEvent( QShowEvent* event)
-{
-	isNeedUpdatePixmap_ = true;
-}
-
-void GisMapWidget::paintEvent( QPaintEvent* event)
+void GisMapWidget::paintEvent(QPaintEvent *event)
 {
 	HMAP hMap = mapData_.agmap.hmap;
-	int mapDepth = mapGetMapScreenDepth();;
-
+	int mapDepth = mapGetMapScreenDepth();
 	RECT rectDraw;
 	int cx, cy, cw, ch;
 	int bytes_per_line;
-
-	if( hMap)
-	{
+	if(hMap){
 		cx = verticalScrollBar_->value();
 		cy = horizontalScrollBar_->value();
 		cw = event->rect().width();
 		ch = event->rect().height();
 		bytes_per_line = cw * mapDepth / 8;
-
-		if( isNeedUpdatePixmap_)
-		{
+		if(isNeedUpdatePixmap_){
 			XIMAGEDESC Ximagedesc;
 			long allignwidth = cw * mapDepth / 8;
 			long size = allignwidth * ch;
-
-			if( imageWidth_ != event->rect().width() || imageHeight_ != event->rect().height())
-			{
-				if( imageBits_)
+			if(imageWidth_ != event->rect().width() || imageHeight_ != event->rect().height()){
+				if(imageBits_)
 					FreeTheMemory(imageBits_);
 
-				imageBits_ = ::AllocateTheMemory( size);
-				if( !imageBits_) return;
-				memset( imageBits_, 0x0, size);
+				imageBits_ = AllocateTheMemory(size);
+				if(!imageBits_)
+					return;
+
+				memset(imageBits_, 0x0, size);
 				imageWidth_ = event->rect().width();
 				imageHeight_ = event->rect().height();
 			}
-
 			Ximagedesc.Point = imageBits_;
 			Ximagedesc.Width = cw;
 			Ximagedesc.Height = ch;
 			Ximagedesc.Depth = mapDepth;
 			Ximagedesc.CellSize = mapDepth / 8;
 			Ximagedesc.RowSize = cw * Ximagedesc.CellSize;
-
 			rectDraw.left = cx;
 			rectDraw.top = cy;
 			rectDraw.right = cx + cw;
 			rectDraw.bottom = cy + ch;
-
-			mapPaintToXImage( hMap, &Ximagedesc, 0, 0, &rectDraw);
+			mapPaintToXImage(hMap, &Ximagedesc, 0, 0, &rectDraw);
 			isNeedUpdatePixmap_ = false;
 		}
 
 		QImage::Format format;
-		switch( mapDepth)
-		{
+		switch (mapDepth){
 			case 8:
 				format = QImage::Format_Indexed8;
 				break;
@@ -118,31 +105,96 @@ void GisMapWidget::paintEvent( QPaintEvent* event)
 				format = QImage::Format_Invalid;
 				break;
 		}
-		QImage image( ( uchar *)imageBits_, cw, ch, bytes_per_line, format);
-
-		QPainter painter( this);
-		painter.drawImage( QPoint( 0, 0), image);
+		QImage image((uchar*)(imageBits_), cw, ch, bytes_per_line, format);
+		QPainter painter(this);
+		painter.drawImage(QPoint(0, 0), image);
 	}
-}
 
+}
 
 void GisMapWidget::closeMap()
 {
-	mapCloseMap( mapData_.agmap.hmap);
+	mapCloseMap(mapData_.agmap.hmap);
 	mapData_.agmap.hmap = 0;
 }
 
-void GisMapWidget::changeScale( double kscale, long int xc, long int yc)
+void GisMapWidget::changeScale(double kscale, long int xc, long int yc)
 {
 	long int oldMapWidth, oldMapHeight;
-
-	mapGetPictureSize( mapData_.agmap.hmap, &oldMapWidth, &oldMapHeight);
-
-	mapChangeViewScale( mapData_.agmap.hmap, &xc, &yc, kscale);
-	mapData_.agmap.scale = mapGetRealShowScale( mapData_.agmap.hmap);
-	emit changeScaleSignal( mapData_.agmap.scale);
+	mapGetPictureSize(mapData_.agmap.hmap, &oldMapWidth, &oldMapHeight);
+	mapChangeViewScale(mapData_.agmap.hmap, &xc, &yc, kscale);
+	mapData_.agmap.scale = mapGetRealShowScale(mapData_.agmap.hmap);changeScaleSignal( mapData_.agmap.scale);
 
 	mapGetPictureSize( mapData_.agmap.hmap, &mapData_.agmap.width, &mapData_.agmap.height);
+}
+
+bool GisMapWidget::MapOpen( QString absoluteMapPath, bool param)
+{
+	if( absoluteMapPath.isEmpty())
+		return false;
+
+	HMAP hMap = mapOpenMap( absoluteMapPath.toStdString().c_str());
+	if( hMap == 0)
+		return false;
+
+	mapData_.agmap.init( hMap);
+	mapData_.agmap.Print();
+
+	verticalScrollBar_->setMinimum( 0);
+	horizontalScrollBar_->setMinimum( 0);
+
+	verticalScrollBar_->setMaximum( mapData_.agmap.width);
+	horizontalScrollBar_->setMaximum( mapData_.agmap.height);
+
+	mapSetBackColor( mapData_.agmap.hmap, 0xFAFAFA);
+
+	return true;
+}
+
+
+void GisMapWidget::GetMapHW(long int * h, long int * w)
+{
+}
+
+void GisMapWidget::SetViewScale(long int scale)
+{
+}
+
+long int GisMapWidget::GetViewScale()
+{
+	return 0;
+}
+
+void GisMapWidget::GetMapLeftTop(int * top, int * left)
+{
+}
+
+void GisMapWidget::SetMapLeftTop(long int left, long int top)
+{
+}
+
+HMAP GisMapWidget::GetMapHandle()
+{
+	return mapData_.agmap.hmap;
+}
+
+QString GisMapWidget::GetMapFileName()
+{
+	return QString();
+}
+
+void GisMapWidget::MapClose()
+{
+}
+
+bool GisMapWidget::GetMapActive()
+{
+	return true;
+}
+
+void GisMapWidget::ConvertMetric( double *X, double* Y, PPLACE pplace1, PPLACE pplace2)
+{
+
 }
 
 } /* namespace gis */

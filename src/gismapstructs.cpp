@@ -1,6 +1,9 @@
 #include <math.h>
 
-#include "fmain.h"
+#include "gismapstructs.h"
+
+namespace gis
+{
 
 MapData::MapData()
 {
@@ -96,4 +99,4 @@ void AGSITE::Print()
 	std::cout << "layerCount = " << layerCount << std::endl;
 }
 
-/* RIP */
+} /* namespace gis */

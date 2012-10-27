@@ -1,5 +1,5 @@
-#if ! defined (_fmain_h_included_)
-#define _fmain_h_included_
+#ifndef GISMAPSTRUCTS_H_
+#define GISMAPSTRUCTS_H_
 
 #include <string>
 #include <map>
@@ -15,6 +15,9 @@ extern "C"
 #undef min
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
+
+namespace gis
+{
 
 enum AGState
 {
@@ -75,4 +78,6 @@ public:
 	std::vector< AGSITE> agsites;
 };
 
-#endif //_fmain_h_included_
+} /* namespace gis */
+
+#endif //GISMAPSTRUCTS_H_
