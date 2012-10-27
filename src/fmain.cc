@@ -24,13 +24,6 @@
 #include <math.h>
 
 #include "fmain.h"
-#include "fview.h"
-#include "fnew.h"
-#include "vars.h"
-#include "dgtbtns.xpm"
-#include "dgtcurs.xpm"
-#include "otoubd.h"
-#include <qscrollarea.h>
 #include <qpainter.h>
 
 MapData::MapData()
@@ -427,8 +420,6 @@ MainWindow::MainWindow( QWidget* parent) :
 	state = AGSNone;
 	oldState = AGSNone;
 
-	fVIEW = 0;
-
 	crZoomIn = new QCursor( QBitmap( 32, 32), QBitmap( 32, 32), 6, 6);
 	crZoomOut = new QCursor( QBitmap( 32, 32), QBitmap( 32, 32), 6, 6);
 
@@ -537,8 +528,6 @@ void MainWindow::checkState()
 }
 void MainWindow::MenuViewViewSlot()
 {
-	if( !fVIEW) fVIEW = new FVIEW( this);
-		fVIEW->show();
 }
 
 void MainWindow::CreateStatus()

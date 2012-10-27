@@ -111,7 +111,6 @@ public:
 	std::vector< AGSITE> agsites;
 };
 
-class FVIEW;
 class QPushButton;
 class QToolBar;
 class QToolButton;
@@ -235,7 +234,6 @@ protected:
 
 	MapWidget* mapWidget;
 	QMenuBar* menuBar_;
-	FVIEW* fVIEW;
 	QToolBar* VFWidget;
 	QListView* LVVF;
 	QListView* LVOTO;
