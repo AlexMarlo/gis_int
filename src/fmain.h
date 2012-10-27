@@ -16,13 +16,6 @@ extern "C"
 #define MIN(a, b)  (((a) < (b)) ? (a) : (b))
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 
-#include <qwidget.h>
-#include <qmainwindow.h>
-#include <qpainter.h>
-#include <qscrollarea.h>
-#include <QMenu>
-#include <QScrollBar>
-
 enum AGState
 {
 	AGSNone = 0,
@@ -81,12 +74,5 @@ public:
 	AGSITE agtmpsite;
 	std::vector< AGSITE> agsites;
 };
-
-class QPushButton;
-class QToolBar;
-class QToolButton;
-class QLabel;
-class QListView;
-class QListViewItem;
 
 #endif //_fmain_h_included_

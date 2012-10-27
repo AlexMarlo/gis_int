@@ -9,46 +9,12 @@ MainWidget::MainWidget( QWidget* parent) :
 	state = AGSNone;
 	oldState = AGSNone;
 
-	crZoomIn = new QCursor( QBitmap( 32, 32), QBitmap( 32, 32), 6, 6);
-	crZoomOut = new QCursor( QBitmap( 32, 32), QBitmap( 32, 32), 6, 6);
-
 	MenuMapOpenSlot();
 
 	mapWidget = new GisMapWidget( mapData, this);
 	setCentralWidget( mapWidget);
 
 	showMaximized();
-}
-
-void MainWidget::LVVFCurrentChangedSlot( QListViewItem* I)
-{
-}
-
-void MainWidget::LVVFExpandedSlot( QListViewItem* I)
-{
-}
-
-void MainWidget::fillLVVF()
-{
-}
-
-void MainWidget::fillLVVF( QListViewItem* I,
-		std::vector< std::pair< int, int> >&chi, bool fill)
-{
-}
-
-void MainWidget::CreateMenus()
-{
-
-}
-
-void MainWidget::CreateTools()
-{
-}
-
-void MainWidget::MenuMapExitSlot()
-{
-	close();
 }
 
 void MainWidget::MenuMapOpenSlot()
@@ -68,96 +34,9 @@ void MainWidget::MenuMapOpenSlot()
 	return;
 }
 
-void MainWidget::MenuMapPOpenSlot()
-{
-}
-
-void MainWidget::MenuMapCloseSlot()
-{
-}
-
-void MainWidget::MenuMapPCloseSlot()
-{
-}
-
-void MainWidget::MenuModeSelectSlot()
-{
-	setState( AGSSelect);
-}
-
-void MainWidget::MenuModeZoomSlot()
-{
-	setState( AGSZoomIn);
-}
-
-void MainWidget::zoomInSlot()
-{
-	setState( AGSZoomIn);
-}
-
-void MainWidget::zoomOutSlot()
-{
-	setState( AGSZoomOut);
-}
-
-void MainWidget::checkState()
-{
-}
-void MainWidget::MenuViewViewSlot()
-{
-}
-
-void MainWidget::CreateStatus()
-{
-}
-
-void MainWidget::viewCoords( double x, double y)
-{
-}
-
-void MainWidget::viewScale( double sc)
-{
-}
-
-void MainWidget::MenuObjCurrentSlot()
-{
-}
-
-void MainWidget::MenuObjNewSlot()
-{
-}
-
-void MainWidget::MenuObjMetSlot()
-{
-}
-
-void MainWidget::MenuObjDelSlot()
-{
-}
-
-void MainWidget::MenuObjUnselectSlot()
-{
-}
-
-void MainWidget::repaintMap()
-{
-}
-
-void MainWidget::qqq()
-{
-}
-
-void MainWidget::ButCreateClickedSlot()
-{
-}
-
 void MainWidget::closeEvent( QCloseEvent * e)
 {
 	QWidget::closeEvent( e);
-}
-
-void MainWidget::ButShowClickedSlot()
-{
 }
 
 } /* namespace gis */
