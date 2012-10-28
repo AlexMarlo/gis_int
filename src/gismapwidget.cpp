@@ -123,7 +123,7 @@ void GisMapWidget::paintEvent(QPaintEvent *event)
 				if(!imageBits_)
 					return;
 
-				memset(imageBits_, 0x0, size);
+				memset( imageBits_, 0x0, size);
 				imageWidth_ = event->rect().width();
 				imageHeight_ = event->rect().height();
 			}
@@ -170,41 +170,17 @@ void GisMapWidget::closeMap()
 	mapData_.agmap.hmap = 0;
 }
 
-void GisMapWidget::changeScale(double kscale, long int xc, long int yc)
+void GisMapWidget::changeScale( double kscale, long int xc, long int yc)
 {
 	if (hMap_ == 0) return;
 
 	long int oldMapWidth, oldMapHeight;
-	mapGetPictureSize(mapData_.agmap.hmap, &oldMapWidth, &oldMapHeight);
-	mapChangeViewScale(mapData_.agmap.hmap, &xc, &yc, kscale);
-	mapData_.agmap.scale = mapGetRealShowScale(mapData_.agmap.hmap);
+	mapGetPictureSize( mapData_.agmap.hmap, &oldMapWidth, &oldMapHeight);
+	mapChangeViewScale( mapData_.agmap.hmap, &xc, &yc, kscale);
+	mapData_.agmap.scale = mapGetRealShowScale( mapData_.agmap.hmap);
 	changeScaleSignal( mapData_.agmap.scale);
 
 	mapGetPictureSize( mapData_.agmap.hmap, &mapData_.agmap.width, &mapData_.agmap.height);
-
-//
-//long int X,Y;
-//long int mapW, mapH;
-//
-////�������� ������� �����
-//X = horizontalScrollBar()->value() + viewport()->width() / 2;
-//Y = verticalScrollBar()->value() + viewport()->height() / 2;
-//mapChangeViewScale(hMap, &X, &Y, Change);
-//mapGetPictureSize(hMap, &mapW, &mapH);
-//
-//MyViewport->hide();
-////��������� �������� �����������
-//MyViewport->resize(mapW, mapH);
-//
-////�������� ����� �����
-//X = X - viewport()->width() / 2;
-//if (X < 0) X = 0;
-//Y = Y - viewport()->height() / 2;
-//if (Y < 0) Y = 0;
-//
-//horizontalScrollBar()->setValue(X);
-//verticalScrollBar()->setValue(Y);
-//MyViewport->show();
 }
 
 bool GisMapWidget::MapOpen( QString absoluteMapPath, bool param)
@@ -216,6 +192,7 @@ bool GisMapWidget::MapOpen( QString absoluteMapPath, bool param)
 	if( hMap_ == 0)
 		return false;
 
+	mapPath_ = absoluteMapPath;
 	mapData_.agmap.init( hMap_);
 	mapData_.agmap.Print();
 
@@ -227,25 +204,36 @@ bool GisMapWidget::MapOpen( QString absoluteMapPath, bool param)
 }
 
 
-void GisMapWidget::GetMapHW(long int * h, long int * w)
+void GisMapWidget::GetMapHW( long int * h, long int * w)
 {
+	*h = mapData_.agmap.height;
+	*w = mapData_.agmap.width;
 }
 
-void GisMapWidget::SetViewScale(long int scale)
+void GisMapWidget::SetViewScale( long int scale)
 {
+	mapSetScreenScale( scale);
+	resizeScoll();
+	repaint();
 }
 
 long int GisMapWidget::GetViewScale()
 {
-	return 0;
+	return mapGetScreenScale();
+//	return mapGetShowScale( hMap_);
 }
 
-void GisMapWidget::GetMapLeftTop(int * top, int * left)
+void GisMapWidget::GetMapLeftTop( int * top, int * left)
 {
+	*left = horizontalScrollBar_->value();
+	*top = verticalScrollBar_->value();
 }
 
-void GisMapWidget::SetMapLeftTop(long int left, long int top)
+void GisMapWidget::SetMapLeftTop( long int left, long int top)
 {
+	horizontalScrollBar_->setValue( left);
+	verticalScrollBar_->setValue( top);
+	repaint();
 }
 
 HMAP GisMapWidget::GetMapHandle()
@@ -255,7 +243,7 @@ HMAP GisMapWidget::GetMapHandle()
 
 QString GisMapWidget::GetMapFileName()
 {
-	return QString();
+	return mapPath_;
 }
 
 void GisMapWidget::MapClose()
@@ -267,17 +255,28 @@ bool GisMapWidget::GetMapActive()
 	return true;
 }
 
-void GisMapWidget::ConvertMetric( double *X, double* Y, PPLACE pplace1, PPLACE pplace2)
+void GisMapWidget::ConvertMetric( double *x, double *y, int placein, int placeout)
 {
+	DOUBLEPOINT src;
+	src.X = *x;
+	src.Y = *y;
+	DOUBLEPOINT tag = src;
+
+	mapTransformPoints( hMap_, &src, placein, &tag, placeout, 1);
+
+	*x = tag.X;
+	*y = tag.Y;
 }
 
 void GisMapWidget::mousePressEvent(QMouseEvent *event)
 {
+	std::cout << "mousePressEvent(QMouseEvent *event)" << std::endl;
 	emit SignalMousePress( event->x(), event->y(), event->modifiers());
 }
 
 void GisMapWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+	std::cout << "mouseReleaseEvent(QMouseEvent *event)" << std::endl;
 	emit SignalMouseRelease( event->x(), event->y(), event->modifiers());
 }
 
@@ -286,6 +285,7 @@ void GisMapWidget::mouseDoubleClickEvent(QMouseEvent *event)
 
 void GisMapWidget::mouseMoveEvent(QMouseEvent *event)
 {
+	std::cout << "mouseMoveEvent(QMouseEvent *event)" << std::endl;
 	emit SignalMouseMove( event->x(), event->y(), event->modifiers());
 }
 

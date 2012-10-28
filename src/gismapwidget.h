@@ -34,7 +34,7 @@ public:
 
 	bool GetMapActive();
 
-	void ConvertMetric( double *X, double* Y, PPLACE pplace1, PPLACE pplace2);
+	void ConvertMetric( double *x, double *y, int placein, int placeout);
 
 signals:
 	void changeCoordSignal( double, double);
@@ -72,6 +72,7 @@ private:
 	QScrollBar * horizontalScrollBar_;
 
 	HMAP hMap_;
+	QString mapPath_;
 	MapData mapData_;
 
 	char *imageBits_;
