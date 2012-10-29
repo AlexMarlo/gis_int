@@ -5,13 +5,16 @@ namespace gis
 
 GisMapWidget::GisMapWidget( QWidget *parent) :
 		QWidget( parent),
+		hMap_( 0),
 		imageBits_( 0),
 		imageWidth_( 0),
 		imageHeight_( 0),
 		isNeedUpdatePixmap_ ( true),
-		hMap_( 0)
+		ScaleFactor_( 1.25)
 {
 	setupUi();
+
+	defaultScale_ = GetViewScale();
 }
 
 void GisMapWidget::setupUi()
@@ -53,19 +56,18 @@ void GisMapWidget::showEvent(QShowEvent *event)
 
 void GisMapWidget::scrollChanged()
 {
-	isNeedUpdatePixmap_ = true;
 	resizeScoll();
-	repaint();
+	Repaint();
 }
 
 void GisMapWidget::scaleChanged()
 {
-	isNeedUpdatePixmap_ = true;
-	repaint();
+	Repaint();
 }
 
 void GisMapWidget::Repaint()
 {
+	isNeedUpdatePixmap_ = true;
 	repaint();
 }
 
@@ -82,27 +84,32 @@ void GisMapWidget::resizeScoll()
 
 	long int x, y;
 	long int mapW, mapH;
+
 	mapGetPictureSize( hMap_, &mapW, &mapH);
 
 	x = mapW - width();
 	y = mapH - height();
 
+	std::cout << "resizeScoll() mapW " << mapW << " mapH "<< mapH  << std::endl;
+
 	if (x < 0) x = 0;
 	if (y < 0) y = 0;
+
+//	horizontalScrollBar_->setValue( horizontalScrollBar_->value() * scale);
+//	verticalScrollBar_->setValue( verticalScrollBar_->value() * scale);
 
 	horizontalScrollBar_->setMaximum( x);
 	verticalScrollBar_->setMaximum( y);
 }
 
-void GisMapWidget::paintEvent(QPaintEvent *event)
+void GisMapWidget::paintEvent( QPaintEvent *event)
 {
-	HMAP hMap = mapData_.agmap.hmap;
 	int mapDepth = mapGetMapScreenDepth();
 	RECT rectDraw;
 	int cx, cy, cw, ch;
 	int bytes_per_line;
 
-	if(hMap)
+	if( hMap_)
 	{
 		cx = horizontalScrollBar_->value();
 		cy = verticalScrollBar_->value();
@@ -137,7 +144,7 @@ void GisMapWidget::paintEvent(QPaintEvent *event)
 			rectDraw.top = cy;
 			rectDraw.right = cx + cw;
 			rectDraw.bottom = cy + ch;
-			mapPaintToXImage(hMap, &Ximagedesc, 0, 0, &rectDraw);
+			mapPaintToXImage( hMap_, &Ximagedesc, 0, 0, &rectDraw);
 			isNeedUpdatePixmap_ = false;
 		}
 
@@ -160,7 +167,12 @@ void GisMapWidget::paintEvent(QPaintEvent *event)
 
 		QImage image((uchar*)(imageBits_), cw, ch, bytes_per_line, format);
 		QPainter painter(this);
-		painter.drawImage(QPoint(0, 0), image);
+		QPixmap pixmap = QPixmap::fromImage( image);
+
+		emit beforePaintSignal( pixmap, event->rect());
+
+		painter.drawPixmap( QPoint(0, 0), pixmap);
+		//painter.drawImage( QPoint(0, 0), image);
 	}
 }
 
@@ -198,8 +210,6 @@ bool GisMapWidget::MapOpen( QString absoluteMapPath, bool param)
 
 	resizeScoll();
 
-	mapSetBackColor( mapData_.agmap.hmap, 0xFAFAFA);
-
 	return true;
 }
 
@@ -212,18 +222,23 @@ void GisMapWidget::GetMapHW( long int * h, long int * w)
 
 void GisMapWidget::SetViewScale( long int scale)
 {
-	mapSetScreenScale( scale);
+	if ( hMap_ == 0) return;
+
+	std::cout << "SetViewScale( long int scale) " << scale << std::endl;
+	mapSetRealShowScale( hMap_, scale);
 	resizeScoll();
-	repaint();
 }
 
 long int GisMapWidget::GetViewScale()
 {
-	return mapGetScreenScale();
-//	return mapGetShowScale( hMap_);
+	if ( hMap_ == 0) return 0;
+
+	std::cout << "GetViewScale( long int scale) " << mapGetRealShowScale( hMap_) << std::endl;
+	return 	mapGetRealShowScale( hMap_);
+
 }
 
-void GisMapWidget::GetMapLeftTop( int * top, int * left)
+void GisMapWidget::GetMapLeftTop( int * left, int * top)
 {
 	*left = horizontalScrollBar_->value();
 	*top = verticalScrollBar_->value();
@@ -233,7 +248,7 @@ void GisMapWidget::SetMapLeftTop( long int left, long int top)
 {
 	horizontalScrollBar_->setValue( left);
 	verticalScrollBar_->setValue( top);
-	repaint();
+	Repaint();
 }
 
 HMAP GisMapWidget::GetMapHandle()
@@ -271,13 +286,13 @@ void GisMapWidget::ConvertMetric( double *x, double *y, int placein, int placeou
 void GisMapWidget::mousePressEvent(QMouseEvent *event)
 {
 	std::cout << "mousePressEvent(QMouseEvent *event)" << std::endl;
-	emit SignalMousePress( event->x(), event->y(), event->modifiers());
+	emit SignalMousePress( event->x(), event->y(), event->button());
 }
 
 void GisMapWidget::mouseReleaseEvent(QMouseEvent *event)
 {
 	std::cout << "mouseReleaseEvent(QMouseEvent *event)" << std::endl;
-	emit SignalMouseRelease( event->x(), event->y(), event->modifiers());
+	emit SignalMouseRelease( event->x(), event->y(), event->button());
 }
 
 void GisMapWidget::mouseDoubleClickEvent(QMouseEvent *event)
@@ -286,8 +301,78 @@ void GisMapWidget::mouseDoubleClickEvent(QMouseEvent *event)
 void GisMapWidget::mouseMoveEvent(QMouseEvent *event)
 {
 	std::cout << "mouseMoveEvent(QMouseEvent *event)" << std::endl;
-	emit SignalMouseMove( event->x(), event->y(), event->modifiers());
+	emit SignalMouseMove( event->x(), event->y(), event->button());
 }
 
+void GisMapWidget::wheelEvent( QWheelEvent* event)
+{
+//	if( scrollingMode_)
+//		return;
+
+	if( event->delta() < 0)
+		zoomInSlot();
+	else
+		zoomOutSlot();
+}
+
+void GisMapWidget::zoomOutSlot()
+{
+	long int h, w;
+	this->GetMapHW( &h, &w);
+	QPoint mousePos = mapFromGlobal( QCursor::pos());
+	DOUBLEPOINT coordinate( this->pictureToGeo( mousePos.x(), mousePos.y()));
+	this->SetViewScale( this->GetViewScale() / ScaleFactor_);
+
+//	if( sender() != zoomOutAction_)
+//	{
+		DOUBLEPOINT dPoint = this->geoToPicture( coordinate);
+		this->SetMapLeftTop( dPoint.x - mousePos.x(), dPoint.y - mousePos.y());
+//	}
+}
+
+void GisMapWidget::zoomInSlot()
+{
+	long int h, w;
+	this->GetMapHW( &h, &w);
+	QSize size = this->size();
+	QPoint mousePos = mapFromGlobal( QCursor::pos());
+	DOUBLEPOINT coordinate = this->pictureToGeo( mousePos.x(), mousePos.y());
+
+	if( h >= size.height() || w >= size.width())
+		this->SetViewScale( this->GetViewScale() * ScaleFactor_);
+	else
+		return;
+
+//	if( sender() != zoomInAction_)
+//	{
+		DOUBLEPOINT dPoint = this->geoToPicture( coordinate);
+		this->SetMapLeftTop( dPoint.x - mousePos.x(), dPoint.y - mousePos.y());
+//	}
+}
+
+DOUBLEPOINT GisMapWidget::pictureToGeo( int x, int y)
+{
+	int left, top;
+	DOUBLEPOINT dpoint;
+
+	this->GetMapLeftTop(&left, &top);
+
+	dpoint.X = left + x;
+	dpoint.Y = top + y;
+	this->ConvertMetric(&dpoint.X, &dpoint.Y, PP_PICTURE, PP_GEO);
+
+	return dpoint;
+}
+
+DOUBLEPOINT GisMapWidget::geoToPicture( const DOUBLEPOINT& coordinate)
+{
+	DOUBLEPOINT doublePoint;
+	doublePoint.x = coordinate.x;
+	doublePoint.y = coordinate.y;
+
+	this->ConvertMetric( &doublePoint.X, &doublePoint.Y, PP_GEO, PP_PICTURE);
+
+	return doublePoint;
+}
 
 } /* namespace gis */
